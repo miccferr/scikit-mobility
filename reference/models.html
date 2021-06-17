@@ -39,6 +39,7 @@
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -101,7 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="measures.html">Measures</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#epr">EPR</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#markov-diary-generator">Markov Diary Generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-skmob.models.markov_diary_generator">Markov Diary Generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gravity">Gravity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#radiation">Radiation</a></li>
 </ul>
@@ -183,13 +184,113 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skmob.models.markov_diary_generator.MarkovDiaryGenerator" title="skmob.models.markov_diary_generator.MarkovDiaryGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">markov_diary_generator.MarkovDiaryGenerator</span></code></a>([name])</p></td>
+<td><p>Markov Diary Learner and Generator.</p></td>
+</tr>
 </tbody>
 </table>
 <div class="section" id="epr">
 <h2>EPR<a class="headerlink" href="#epr" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="markov-diary-generator">
-<h2>Markov Diary Generator<a class="headerlink" href="#markov-diary-generator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-skmob.models.markov_diary_generator">
+<span id="markov-diary-generator"></span><h2>Markov Diary Generator<a class="headerlink" href="#module-skmob.models.markov_diary_generator" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="skmob.models.markov_diary_generator.MarkovDiaryGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">skmob.models.markov_diary_generator.</span></span><span class="sig-name descname"><span class="pre">MarkovDiaryGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Markov</span> <span class="pre">diary'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skmob.models.markov_diary_generator.MarkovDiaryGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Markov Diary Learner and Generator.</p>
+<p>A diary generator <span class="math notranslate nohighlight">\(G\)</span> produces a mobility diary, <span class="math notranslate nohighlight">\(D(t)\)</span>, containing the sequence of trips made by an agent during a time period divided in time slots of <span class="math notranslate nohighlight">\(t\)</span> seconds. For example, <span class="math notranslate nohighlight">\(G(3600)\)</span> and <span class="math notranslate nohighlight">\(G(60)\)</span> produce mobility diaries with temporal resolutions of one hour and one minute, respectively <a class="reference internal" href="#ps2018" id="id1"><span>[PS2018]</span></a>.</p>
+<p>A Mobility Diary Learner (MDL) is a data-driven algorithm to compute a mobility diary <span class="math notranslate nohighlight">\(MD\)</span> from the mobility trajectories of a set of real individuals. We use a Markov model to describe the probability that an individual follows her routine and visits a typical location at the usual time, or she breaks the routine and visits another location. First, MDL translates mobility trajectory data of real individuals into abstract mobility trajectories. Second, it uses the obtained abstract trajectory data to compute the transition probabilities of the Markov model <span class="math notranslate nohighlight">\(MD(t)\)</span> <a class="reference internal" href="#ps2018" id="id2"><span>[PS2018]</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str, optional</em>) – name of the instantiation of the class. The default is “Markov diary”.</p>
+</dd>
+<dt class="field-even">Variables</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – name of the instantiation of the class.</p></li>
+<li><p><strong>markov_chain_</strong> (<em>dict</em>) – the trained markov chain.</p></li>
+<li><p><strong>time_slot_length</strong> (<em>str</em>) – length of the time slot (1h).</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">skmob</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skmob.models.epr</span> <span class="kn">import</span> <span class="n">Ditras</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skmob.models.markov_diary_generator</span> <span class="kn">import</span> <span class="n">MarkovDiaryGenerator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skmob.preprocessing</span> <span class="kn">import</span> <span class="n">filtering</span><span class="p">,</span> <span class="n">compression</span><span class="p">,</span> <span class="n">detection</span><span class="p">,</span> <span class="n">clustering</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">url</span> <span class="o">=</span> <span class="n">skmob</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">GEOLIFE_SAMPLE</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;gzip&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tdf</span> <span class="o">=</span> <span class="n">skmob</span><span class="o">.</span><span class="n">TrajDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">latitude</span><span class="o">=</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span> <span class="n">longitude</span><span class="o">=</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ctdf</span> <span class="o">=</span> <span class="n">compression</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">tdf</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stdf</span> <span class="o">=</span> <span class="n">detection</span><span class="o">.</span><span class="n">stops</span><span class="p">(</span><span class="n">ctdf</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cstdf</span> <span class="o">=</span> <span class="n">clustering</span><span class="o">.</span><span class="n">cluster</span><span class="p">(</span><span class="n">stdf</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mdg</span> <span class="o">=</span> <span class="n">MarkovDiaryGenerator</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mdg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cstdf</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">lid</span><span class="o">=</span><span class="s1">&#39;cluster&#39;</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s1">&#39;2019/01/01 08:00:00&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diary</span> <span class="o">=</span> <span class="n">mdg</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">start_time</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">diary</span><span class="p">)</span>
+<span class="go">             datetime  abstract_location</span>
+<span class="go">0 2019-01-01 08:00:00                  0</span>
+<span class="go">1 2019-01-02 19:00:00                  1</span>
+<span class="go">2 2019-01-02 20:00:00                  0</span>
+<span class="go">3 2019-01-03 17:00:00                  1</span>
+<span class="go">4 2019-01-03 18:00:00                  2</span>
+<span class="go">5 2019-01-04 08:00:00                  0</span>
+<span class="go">6 2019-01-05 03:00:00                  1</span>
+</pre></div>
+</div>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="ps2018"><span class="brackets">PS2018</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>)</span></dt>
+<dd><p>Pappalardo, L. &amp; Simini, F. (2018) Data-driven generation of spatio-temporal routines in human mobility. Data Mining and Knowledge Discovery 32, 787-829, <a class="reference external" href="https://link.springer.com/article/10.1007/s10618-017-0548-4">https://link.springer.com/article/10.1007/s10618-017-0548-4</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ditras</span></code></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="skmob.models.markov_diary_generator.MarkovDiaryGenerator.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_individuals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'location'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skmob.models.markov_diary_generator.MarkovDiaryGenerator.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train the markov mobility diary from real trajectories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj</strong> (<em>TrajDataFrame</em>) – the trajectories of the individuals.</p></li>
+<li><p><strong>n_individuals</strong> (<em>int</em>) – the number of individuals in the TrajDataFrame to consider.</p></li>
+<li><p><strong>lid</strong> (<em>string, optional</em>) – the name of the column containing the identifier of the location. The default is “location”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skmob.models.markov_diary_generator.MarkovDiaryGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">diary_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skmob.models.markov_diary_generator.MarkovDiaryGenerator.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the generation of the mobility diary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>diary_length</strong> (<em>int</em>) – the length of the diary in hours.</p></li>
+<li><p><strong>start_date</strong> (<em>datetime</em>) – the starting date of the generation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the generated mobility diary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="gravity">
 <h2>Gravity<a class="headerlink" href="#gravity" title="Permalink to this headline">¶</a></h2>
